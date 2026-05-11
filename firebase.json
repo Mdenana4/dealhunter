@@ -1,0 +1,13 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "dealhunter-egypt-70d29",
+          "appId": "1:477835366168:android:c793cff789692375b4986d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      }
+    }
+  }
+}
