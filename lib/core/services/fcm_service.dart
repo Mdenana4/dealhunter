@@ -5,7 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 /// FCM Service — handles Firebase Cloud Messaging for deal notifications.
-/// 
+///
 /// REQUIRED packages in pubspec.yaml:
 ///   firebase_core: ^2.24.2
 ///   firebase_messaging: ^14.7.10
@@ -23,16 +23,15 @@ class FCMService {
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
 
-  /// Initialize Firebase, subscribe to topic, create notification channel.
+  /// Initialize FCM. Firebase already initialized in main.dart.
   Future<void> initialize() async {
     if (_initialized) return;
 
     try {
-      // 1. Initialize Firebase
-      await Firebase.initializeApp();
-      debugPrint('[FCM] Firebase initialized');
+      // Firebase already initialized in main.dart with options
+      debugPrint('[FCM] Using existing Firebase app');
 
-      // 2. Request notification permission
+      // 1. Request notification permission
       final settings = await FirebaseMessaging.instance.requestPermission(
         alert: true,
         badge: true,
@@ -41,7 +40,7 @@ class FCMService {
       );
       debugPrint('[FCM] Permission: ${settings.authorizationStatus.name}');
 
-      // 3. Create Android notification channel (required for Android 8+)
+      // 2. Create Android notification channel (required for Android 8+)
       const AndroidNotificationChannel channel = AndroidNotificationChannel(
         'deal_alerts', // MUST match backend channel_id
         'Deal Alerts',
@@ -54,7 +53,7 @@ class FCMService {
           ?.createNotificationChannel(channel);
       debugPrint('[FCM] Notification channel created');
 
-      // 4. Initialize local notifications plugin
+      // 3. Initialize local notifications plugin
       const AndroidInitializationSettings androidInit =
           AndroidInitializationSettings('@mipmap/ic_launcher');
       const DarwinInitializationSettings iosInit =
@@ -65,9 +64,13 @@ class FCMService {
       );
       await _localNotifications.initialize(initSettings);
 
-      // 5. Subscribe to tier_free topic (for free tier users)
+      // 4. Subscribe to tier_free topic (for free tier users)
       await FirebaseMessaging.instance.subscribeToTopic('tier_free');
       debugPrint('[FCM] Subscribed to tier_free');
+
+      // 5. Get FCM token for debugging
+      final token = await FirebaseMessaging.instance.getToken();
+      debugPrint('[FCM] Token: $token');
 
       // 6. Listen to foreground messages
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -132,7 +135,8 @@ class FCMService {
 }
 
 /// Background message handler (must be a top-level function).
+@pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  // Firebase already initialized in main.dart
   debugPrint('[FCM] Background: ${message.notification?.title}');
 }
