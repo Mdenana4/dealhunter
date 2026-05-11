@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -9,6 +10,7 @@ import 'features/explore/explore_screen.dart';
 import 'features/radar/radar_screen.dart';
 import 'features/saved/saved_screen.dart';
 import 'features/profile/profile_screen.dart';
+import 'firebase_options.dart';
 
 /// API Base URL — uses Railway production by default.
 /// Override with: --dart-define=API_BASE_URL=https://your-url
@@ -19,6 +21,12 @@ const String apiBaseUrl = String.fromEnvironment(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase with platform-specific options
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  debugPrint('[FCM] Firebase initialized with options');
 
   // Initialize Firebase Cloud Messaging
   await FCMService().initialize();
